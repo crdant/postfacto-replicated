@@ -1,0 +1,23 @@
+apiVersion: kots.io/v1beta1
+kind: HelmChart
+metadata:
+  name: postfacto
+spec:
+  chart:
+    name: postfacto
+  values:
+    googleOAuthClientId: repl{{ ConfigOption "google_oath_client_id" }}
+    disable_ssl_redirect: repl{{ ConfigOption "google_oath_client_id" }}
+    secret_key_base: repl{{ ConfigOption "google_oath_client_id" }}
+
+    redis:
+      password: 
+
+    postgresql:
+      postgresqlPassword:
+
+  # When building AirGap, metrics needs to be explicitly enabled so the prometheus image can be bundled along. 
+  # Kots does not include the image unless the service is explicitly enabled during the bundle building process.
+  builder:
+    metrics:
+      enabled: true

@@ -5,42 +5,41 @@ metadata:
   name: config-sample
 spec:
   groups:
-  - name: example_settings
-    title: My Example Config
-    description: Configuration to serve as an example for creating your own. See [https://kots.io/reference/v1beta1/config/](https://kots.io/reference/v1beta1/config/) for configuration docs. In this case, we provide example fields for configuring an Nginx welcome page.
+  - name: postfacto
+    title: Postfacto Configuration
+    description: 
     items:
-    - name: show_text_inputs
-      title: Customize Text Inputs
-      help_text: "Show custom user text inputs"
-      type: bool
-      default: "0"
+    - name: google_oath_client_id
+      title: Google Client ID
+      help_text: "The Google oAuth client ID to use to allow users to log in using a google account"	
+      type: text
+      default: ""
       recommended: true
-    - name: example_default_value
-      title: Text Example (with default value)
+    - name: disable_ssl_redirect
+      title: Disable SSL Redirect
+      help_text: "By default Postfacto redirects to HTTPS by default, setting this to true disables that behaviour and can be useful when getting started"
+      type: bool
+      value: false
+    - name: secret_key_base
+      title: Secret Key Base
+      help_text: "Used for signing and encryption, should be set to a random value. Required to perserve sessions across upgrades"
       type: text
-      value: ""
-      default: please change this value
-      when: repl{{ ConfigOptionEquals "show_text_inputs" "1" }}
-    - name: api_token
-      title: API token
-      type: password
-      props:
-        rows: 5
-      when: repl{{ ConfigOptionEquals "show_text_inputs" "1" }}
-    - name: readonly_text_left
-      title: Readonly Text On the Left
+      default: repl{{ RandomString 10 }}
+      when: false
+  - name: datastores
+    title: Data Service Configuration
+    description: 
+    items:
+    - name: redis_password
+      title: Redis Password
+      help_text: "Password for the redis "	
       type: text
-      value: "{{repl RandomString 10}}"
-      readonly: true
-      # affix: left
-      when: repl{{ ConfigOptionEquals "show_text_inputs" "1" }}
-    - name: hidden_text
-      title: Secret Key
-      type: password
-      hidden: true
-      value: "{{repl RandomString 40}}"
-    - name: hidden_text_two
-      title: Public Key
-      type: password
-      hidden: true
-      value: "{{repl RandomString 40}}"
+      default: repl{{ RandomString 64 }}
+      recommended: true
+    - name: postres_password
+      title: Postgres Password
+      help_text: "Password for the redis "	
+      type: text
+      default: repl{{ RandomString 64 }}
+      recommended: true
+    when: false
