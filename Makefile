@@ -1,7 +1,7 @@
-CHANNEL=$(shell basename $(shell pwd))
+CHANNEL=development
 
 MANIFEST_DIR   := ./manifests
-MANIFESTS := $(shell find $(MANIFEST_DIR) -name '*.yaml')
+MANIFESTS := $(shell find $(MANIFEST_DIR) -name '*.yaml' -o -name '*.tgz')
 
 lint: $(MANIFESTS)
 	@replicated release lint --yaml-dir $(MANIFEST_DIR)
@@ -13,3 +13,6 @@ release: $(MANIFESTS)
 		--auto -y \
 		--yaml-dir $(MANIFEST_DIR) \
 		--promote $(CHANNEL)
+
+install:
+	@kubectl kots install ${REPLICATED_APP}
