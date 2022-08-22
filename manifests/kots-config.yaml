@@ -2,13 +2,19 @@
 apiVersion: kots.io/v1beta1
 kind: Config
 metadata:
-  name: config-sample
+  name: postfacto
 spec:
   groups:
   - name: postfacto
     title: Postfacto Configuration
-    description: 
+    description: Configures the Postfacto application
     items:
+    - name: fqdn
+      title: Host
+      help_text: "The fully qualifed domain name for the postfacto instance"
+      type: text
+      recommended: true
+      default: "postfacto.local"
     - name: google_oath_client_id
       title: Google Client ID
       help_text: "The Google oAuth client ID to use to allow users to log in using a google account"	
@@ -23,23 +29,23 @@ spec:
     - name: secret_key_base
       title: Secret Key Base
       help_text: "Used for signing and encryption, should be set to a random value. Required to perserve sessions across upgrades"
-      type: text
+      type: password
       default: repl{{ RandomString 10 }}
       when: false
   - name: datastores
     title: Data Service Configuration
-    description: 
+    description: Configurations the datastores for Postfacto 
     items:
     - name: redis_password
       title: Redis Password
       help_text: "Password for the redis "	
-      type: text
+      type: password
       default: repl{{ RandomString 64 }}
       recommended: true
-    - name: postres_password
+    - name: postgres_password
       title: Postgres Password
       help_text: "Password for the redis "	
-      type: text
+      type: password
       default: repl{{ RandomString 64 }}
       recommended: true
     when: false
