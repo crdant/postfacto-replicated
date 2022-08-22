@@ -41,6 +41,8 @@ spec:
           enabled: true
           annotations:
             kubernetes.io/tls-acme: "true"
+            projectcontour.io/websocket-routes: "/"
+            ingress.kubernetes.io/force-ssl-redirect: "true"
           hosts:
           - host: repl{{ ConfigOption "fqdn" }}
             paths:
