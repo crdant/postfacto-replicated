@@ -39,6 +39,20 @@ spec:
           enabled: true
           hosts:
           - host: repl{{ ConfigOption "fqdn" }}
+    - when: 'repl{{ not ( empty ( ConfigOption "fqdn" )) }}'
+      recursiveMerge: true
+      values:
+        ingress:
+          enabled: true
+          annotations:
+            kubernetes.io/tls-acme: "true"
+          hosts:
+          - host: repl{{ ConfigOption "fqdn" }}
+          tls:
+          - hosts:
+            - repl{{ ConfigOption "fqdn" }}
+            secretName: postfacto-cert 
+
 
   # When building AirGap, metrics needs to be explicitly enabled so the prometheus image can be bundled along. 
   # Kots does not include the image unless the service is explicitly enabled during the bundle building process.
