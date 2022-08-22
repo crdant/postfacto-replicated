@@ -39,17 +39,12 @@ spec:
       values:
         ingress:
           enabled: true
-          hosts:
-          - host: repl{{ ConfigOption "fqdn" }}
-    - when: 'repl{{ not ( empty ( ConfigOption "fqdn" )) }}'
-      recursiveMerge: true
-      values:
-        ingress:
-          enabled: true
           annotations:
             kubernetes.io/tls-acme: "true"
           hosts:
           - host: repl{{ ConfigOption "fqdn" }}
+            paths:
+            - /
           tls:
           - hosts:
             - repl{{ ConfigOption "fqdn" }}
