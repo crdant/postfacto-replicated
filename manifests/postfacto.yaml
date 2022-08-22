@@ -27,9 +27,11 @@ spec:
           password: repl{{ ConfigOption "redis_password" }}
 
     postgresql:
-      global:
-        auth:
-          postgresqlPassword: repl{{ ConfigOption "postgres_password" }}
+      auth:
+        enablePostgresUser: false
+        username: postfacto
+        password: repl{{ ConfigOption "postgres_password" }}
+        database: postfacto
 
   optionalValues:
     - when: 'repl{{ not ( empty ( ConfigOption "fqdn" )) }}'
