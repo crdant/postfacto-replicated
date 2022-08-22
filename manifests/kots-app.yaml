@@ -4,8 +4,8 @@ kind: Application
 metadata:
   name: postfacto
 spec:
-  title: App Name
-  icon: https://raw.githubusercontent.com/cncf/artwork/master/projects/kubernetes/icon/color/kubernetes-icon-color.png
+  title: Postfacto
+  icon: https://raw.githubusercontent.com/pivotal/postfacto/master/web/src/images/happy.svg
   statusInformers:
     - deployment/postfacto
   ports:
