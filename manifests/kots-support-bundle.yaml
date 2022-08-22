@@ -2,15 +2,15 @@
 apiVersion: troubleshoot.sh/v1beta2
 kind: SupportBundle
 metadata:
-  name: example-support-bundle
+  name: postfacto
 spec:
   collectors:
     - clusterInfo: {}
     - clusterResources: {}
     - logs:
         selector:
-          - app=example
-          - component=nginx
+          - app=postfacto
+          - component=postfacto
         namespace: '{{repl Namespace }}'
         limits:
           maxAge: 30d

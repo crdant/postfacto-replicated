@@ -2,7 +2,7 @@
 apiVersion: troubleshoot.sh/v1beta2
 kind: Preflight
 metadata:
-  name: example-preflight-checks
+  name: postfacto
 spec:
   analyzers:
     - clusterVersion:
