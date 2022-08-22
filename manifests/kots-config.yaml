@@ -40,12 +40,11 @@ spec:
       title: Redis Password
       help_text: "Password for the redis "	
       type: password
-      default: repl{{ RandomString 64 }}
+      default: repl{{ RandomString 31 }}
       recommended: true
     - name: postgres_password
       title: Postgres Password
       help_text: "Password for the redis "	
       type: password
-      default: repl{{ RandomString 64 }}
+      default: repl{{ RandomString 31 }}
       recommended: true
-    when: false
