@@ -21,18 +21,6 @@ spec:
     disable_ssl_redirect: repl{{ ConfigOption "disable_ssl_redirect" }}
     secret_key_base: repl{{ ConfigOption "secret_key_base" }}
 
-    redis:
-      global:
-        redis:
-          password: repl{{ ConfigOption "redis_password" }}
-
-    postgresql:
-      auth:
-        enablePostgresUser: false
-        username: postfacto
-        password: repl{{ ConfigOption "postgres_password" }}
-        database: postfacto
-
   optionalValues:
     - when: 'repl{{ not ( empty ( ConfigOption "fqdn" )) }}'
       recursiveMerge: true
@@ -51,7 +39,22 @@ spec:
           - hosts:
             - repl{{ ConfigOption "fqdn" }}
             secretName: postfacto-cert 
-
+    - when: '{{repl ConfigOptionEquals "postgres_type" "embedded_postgres"}}'
+      recursiveMerge: true
+      values:
+        postgresql:
+          auth:
+            enablePostgresUser: false
+            username: postfacto
+            password: repl{{ ConfigOption "embedded_postgres_password" }}
+            database: postfacto
+    - when: '{{repl ConfigOptionEquals "postgres_type" "embedded_redis"}}'
+      recursiveMerge: true
+      values:
+        redis:
+          global:
+            redis:
+              password: repl{{ ConfigOption "redis_password" }}
 
   # When building AirGap, metrics needs to be explicitly enabled so the prometheus image can be bundled along. 
   # Kots does not include the image unless the service is explicitly enabled during the bundle building process.
