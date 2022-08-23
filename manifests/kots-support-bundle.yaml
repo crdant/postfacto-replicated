@@ -2,16 +2,79 @@
 apiVersion: troubleshoot.sh/v1beta2
 kind: SupportBundle
 metadata:
-  name: example-support-bundle
+  name: postfacto
 spec:
   collectors:
-    - clusterInfo: {}
-    - clusterResources: {}
-    - logs:
-        selector:
-          - app=example
-          - component=nginx
-        namespace: '{{repl Namespace }}'
-        limits:
-          maxAge: 30d
-          maxLines: 10000
+  - logs:
+      name: postfacto/app/logs
+      selector:
+        - app.kubernetes.io/name=postfacto
+      namespace: '{{repl Namespace }}'
+      limits:
+        maxAge: 30d
+        maxLines: 10000
+  - logs:
+      name: postfacto/redis/logs
+      selector:
+        - app.kubernetes.io/name=redis
+        - app.kubernetes.io/instance=postfacto
+      namespace: '{{repl Namespace }}'
+      limits:
+        maxAge: 30d
+        maxLines: 10000
+  - logs:
+      name: postfacto/postgres/logs
+      selector:
+        - app.kubernetes.io/name=postgresql
+        - app.kubernetes.io/instance=postfacto
+      namespace: '{{repl Namespace }}'
+      limits:
+        maxAge: 30d
+        maxLines: 10000
+  analyzers:
+  - imagePullSecret:
+          checkName: Access to index.docker.io
+          registryName: index.docker.io
+          outcomes:
+          - fail:
+              message: Could not find index.docker.io imagePullSecret
+          - pass:
+              message: Found credentials to pull private images from index.docker.io
+  - ingress:
+      ingressName: postfacto
+      namespace: '{{repl Namespace}}'
+      outcomes:
+        - fail:
+            message: Postfacto ingress is missing or not ready.
+        - pass:
+            message: Postfacto ingress is ready.
+  - deploymentStatus:
+      name: postfacto
+      namespace: '{{repl Namespace}}'
+      outcomes:
+        - fail:
+            when: "< 1"
+            message: Postfacto application is not ready
+        - pass:
+            message: Postfacto application is ready
+  - statefulsetStatus:
+      name: postfacto-redis-replicas
+      namespace: '{{repl Namespace}}'
+      outcomes:
+        - fail:
+            when: "< 1"
+            message: No Redis Replicas available
+        - warn:
+            when: "= 1"
+            message: "Degraded: Redis has only a single ready replica."
+        - pass:
+            message: There are multiple replicas of Redis ready.
+  - statefulsetStatus:
+      name: postfacto-postgresql
+      namespace: '{{repl Namespace}}'
+      outcomes:
+        - fail:
+            when: "< 1"
+            message: No Postgres database available
+        - pass:
+            message: Postgres database is ready

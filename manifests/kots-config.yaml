@@ -2,45 +2,49 @@
 apiVersion: kots.io/v1beta1
 kind: Config
 metadata:
-  name: config-sample
+  name: postfacto
 spec:
   groups:
-  - name: example_settings
-    title: My Example Config
-    description: Configuration to serve as an example for creating your own. See [https://kots.io/reference/v1beta1/config/](https://kots.io/reference/v1beta1/config/) for configuration docs. In this case, we provide example fields for configuring an Nginx welcome page.
+  - name: postfacto
+    title: Postfacto Configuration
+    description: Configures the Postfacto application
     items:
-    - name: show_text_inputs
-      title: Customize Text Inputs
-      help_text: "Show custom user text inputs"
-      type: bool
-      default: "0"
+    - name: fqdn
+      title: Host
+      help_text: "The fully qualifed domain name for the postfacto instance"
+      type: text
       recommended: true
-    - name: example_default_value
-      title: Text Example (with default value)
+      default: "postfacto.local"
+    - name: google_oath_client_id
+      title: Google Client ID
+      help_text: "The Google oAuth client ID to use to allow users to log in using a google account"	
       type: text
-      value: ""
-      default: please change this value
-      when: repl{{ ConfigOptionEquals "show_text_inputs" "1" }}
-    - name: api_token
-      title: API token
+      default: ""
+      recommended: true
+    - name: disable_ssl_redirect
+      title: Disable SSL Redirect
+      help_text: "By default Postfacto redirects to HTTPS by default, setting this to true disables that behaviour and can be useful when getting started"
+      type: bool
+      value: false
+    - name: secret_key_base
+      title: Secret Key Base
+      help_text: "Used for signing and encryption, should be set to a random value. Required to perserve sessions across upgrades"
       type: password
-      props:
-        rows: 5
-      when: repl{{ ConfigOptionEquals "show_text_inputs" "1" }}
-    - name: readonly_text_left
-      title: Readonly Text On the Left
-      type: text
-      value: "{{repl RandomString 10}}"
-      readonly: true
-      # affix: left
-      when: repl{{ ConfigOptionEquals "show_text_inputs" "1" }}
-    - name: hidden_text
-      title: Secret Key
+      default: repl{{ RandomString 10 }}
+      when: false
+  - name: datastores
+    title: Data Service Configuration
+    description: Configurations the datastores for Postfacto 
+    items:
+    - name: embedded_postgres_password
+      title: Postgres Password
+      help_text: "Password for the embedded postgres database"	
       type: password
+      value: repl{{ RandomString 32 }}
       hidden: true
-      value: "{{repl RandomString 40}}"
-    - name: hidden_text_two
-      title: Public Key
+    - name: embedded_redis_password
+      title: Redis Password
+      help_text: "Password for the embedded redis datatstore"	
       type: password
+      value: repl{{ RandomString 32 }}
       hidden: true
-      value: "{{repl RandomString 40}}"

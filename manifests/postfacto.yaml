@@ -1,0 +1,58 @@
+apiVersion: kots.io/v1beta1
+kind: HelmChart
+metadata:
+  name: postfacto
+
+spec:
+  chart:
+    name: postfacto
+    chartVersion: 0.5.1-SNAPSHOT
+
+  # helmVersion identifies the Helm Version used to render the Chart. Default is v2.
+  helmVersion: v3
+
+  # useHelmInstall identifies whether this Helm chart will use the
+  # Replicated Helm installation (false) or native Helm installation (true). Default is false.
+  # Native Helm installations are only available for Helm v3 charts.
+  useHelmInstall: true
+
+  values:
+    googleOAuthClientId: repl{{ ConfigOption "google_oath_client_id" }}
+    disable_ssl_redirect: repl{{ ConfigOption "disable_ssl_redirect" }}
+    secret_key_base: repl{{ ConfigOption "secret_key_base" }}
+
+    redis:
+      global:
+        redis:
+          password: repl{{ ConfigOption "embedded_redis_password" }}
+    postgresql:
+      auth:
+        enablePostgresUser: false
+        username: postfacto
+        password: repl{{ ConfigOption "embedded_postgres_password" }}
+        database: postfacto
+ 
+  optionalValues:
+    - when: 'repl{{ not ( empty ( ConfigOption "fqdn" )) }}'
+      recursiveMerge: true
+      values:
+        ingress:
+          enabled: true
+          annotations:
+            kubernetes.io/tls-acme: "true"
+            projectcontour.io/websocket-routes: "/"
+            ingress.kubernetes.io/force-ssl-redirect: "true"
+          hosts:
+          - host: repl{{ ConfigOption "fqdn" }}
+            paths:
+            - /
+          tls:
+          - hosts:
+            - repl{{ ConfigOption "fqdn" }}
+            secretName: postfacto-cert 
+
+  # When building AirGap, metrics needs to be explicitly enabled so the prometheus image can be bundled along. 
+  # Kots does not include the image unless the service is explicitly enabled during the bundle building process.
+  builder:
+    metrics:
+      enabled: true

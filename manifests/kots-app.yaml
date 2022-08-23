@@ -2,14 +2,14 @@
 apiVersion: kots.io/v1beta1
 kind: Application
 metadata:
-  name: example-nginx
+  name: postfacto
 spec:
-  title: App Name
-  icon: https://raw.githubusercontent.com/cncf/artwork/master/projects/kubernetes/icon/color/kubernetes-icon-color.png
+  title: Postfacto
+  icon: https://raw.githubusercontent.com/pivotal/postfacto/master/web/src/images/happy.svg
   statusInformers:
-    - deployment/example-nginx
+    - deployment/postfacto
   ports:
-    - serviceName: "example-nginx"
+    - serviceName: "postfacto"
       servicePort: 80
       localPort: 8888
-      applicationUrl: "http://example-nginx"
+      applicationUrl: "http://postfacto"
