@@ -8,6 +8,8 @@ spec:
   icon: https://raw.githubusercontent.com/pivotal/postfacto/master/web/src/images/happy.svg
   statusInformers:
     - deployment/postfacto
+    - statefulset/postfacto-postgresql
+    - statefulset/postfacto-redis
   ports:
     - serviceName: "postfacto"
       servicePort: 80
