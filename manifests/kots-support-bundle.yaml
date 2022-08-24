@@ -33,14 +33,15 @@ spec:
         maxLines: 10000
   analyzers:
   - imagePullSecret:
-          checkName: Access to index.docker.io
-          registryName: index.docker.io
-          outcomes:
-          - fail:
-              message: Could not find index.docker.io imagePullSecret
-          - pass:
-              message: Found credentials to pull private images from index.docker.io
+      checkName: Access to index.docker.io
+      registryName: index.docker.io
+      outcomes:
+      - fail:
+          message: Could not find index.docker.io imagePullSecret
+      - pass:
+          message: Found credentials to pull private images from index.docker.io
   - ingress:
+      checkName: Access via Ingress
       ingressName: postfacto
       namespace: '{{repl Namespace}}'
       outcomes:
@@ -49,6 +50,7 @@ spec:
         - pass:
             message: Postfacto ingress is ready.
   - deploymentStatus:
+      checkName: Application ready
       name: postfacto
       namespace: '{{repl Namespace}}'
       outcomes:
@@ -58,6 +60,7 @@ spec:
         - pass:
             message: Postfacto application is ready
   - statefulsetStatus:
+      checkName: Redis available
       name: postfacto-redis-replicas
       namespace: '{{repl Namespace}}'
       outcomes:
@@ -70,6 +73,7 @@ spec:
         - pass:
             message: There are multiple replicas of Redis ready.
   - statefulsetStatus:
+      checkName: Postfacto available
       name: postfacto-postgresql
       namespace: '{{repl Namespace}}'
       outcomes:
