@@ -6,7 +6,7 @@ metadata:
 spec:
   chart:
     name: postfacto
-    chartVersion: 0.5.1-SNAPSHOT
+    chartVersion: 0.1.0-SNAPSHOT
 
   # helmVersion identifies the Helm Version used to render the Chart. Default is v2.
   helmVersion: v3
