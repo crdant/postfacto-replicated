@@ -31,6 +31,14 @@ spec:
       limits:
         maxAge: 30d
         maxLines: 10000
+  - postgres:
+        collectorName: PostgreSQL Connection
+        name: postfacto
+        uri: 'postgresql://{{repl ConfigOption "embedded_postgres_username"}}:{{repl ConfigOption "embedded_postgres_password"}}@postfacto-postgresql:5432/{{repl ConfigOption "embedded_postgres_database"}}'
+  - redis:
+        collectorName: Redis Connection
+        name: postfacto
+        uri: 'postgresql://:{{repl ConfigOption "embedded_redis_password"}}@postfacto-redis-master'
   analyzers:
   - imagePullSecret:
       checkName: Access to index.docker.io
@@ -82,3 +90,24 @@ spec:
             message: No Postgres database available
         - pass:
             message: Postgres database is ready
+  - postgres:
+      checkName: Postgres available
+      collectorName: postfacto
+      outcomes:
+        - fail:
+            when: connected == false
+            message: Cannot connect to PostgreSQL server
+        - pass:
+            message: The PostgreSQL server is ready
+  - jsonCompare:
+      checkName: PostgresAvailable
+      fileName: redis/postfacto.json
+      path: "isConnected"
+      value: "true"
+      outcomes:
+        - fail:
+            when: "false"
+            message: Cannot connect to Redis server
+        - pass:
+            when: "true"
+            message: The Redis server is ready
