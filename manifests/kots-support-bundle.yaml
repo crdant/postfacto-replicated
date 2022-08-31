@@ -31,6 +31,12 @@ spec:
       limits:
         maxAge: 30d
         maxLines: 10000
+  - postgres:
+      collectorName: postfacto
+      uri: 'postgres://{{repl ConfigOption "embedded_postgres_username" }}:{{repl ConfigOption "embedded_postgres_password" }}@postfacto-postgresql'
+  - redis:
+      collectorName: postfacto
+      uri: 'redis://:{{repl ConfigOption "embedded_redis_password"}}@{{repl ConfigOption "external_redis_host"}}:{{repl ConfigOption "external_redis_port"}}'
   analyzers:
   - imagePullSecret:
       checkName: Access to index.docker.io
