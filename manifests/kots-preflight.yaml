@@ -4,6 +4,13 @@ kind: Preflight
 metadata:
   name: postfacto
 spec:
+  collectors:
+    - postgres:
+        collectorName: postgresql
+        uri: 'postgres://{{repl ConfigOption "external_postgres_username" }}:{{repl ConfigOption "external_postgres_password" }}@{{ repl ConfigOption "external_postgres_database" }}'
+    - redis:
+        collectorName: redis
+        uri: 'redis://:{{repl ConfigOption "external_postgres_password" }}@{{ repl ConfigOption "external_postgres_database" }}'
   analyzers:
     - clusterVersion:
         outcomes:
@@ -65,3 +72,13 @@ spec:
               message: The cluster should contain at least 4 cores.
           - pass:
               message: There are at least 4 cores in the cluster.
+    - postgres:
+        exclude: '{{repl ConfigOptionEquals "postgres_type" "embedded_postgres"}}'
+        checkName: External Postgres is available
+        collectorName: postgresql
+        outcomes:
+          - fail:
+              when: connected == false
+              message: Cannot connect to PostgreSQL server
+          - pass:
+              message: The PostgreSQL server is ready
