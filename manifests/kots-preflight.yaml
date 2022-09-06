@@ -73,7 +73,7 @@ spec:
           - pass:
               message: There are at least 4 cores in the cluster.
     - postgres:
-        exclude: '{{repl ConfigOptionEquals "postgres_type" "embedded_postgres"}}'
+        exclude: repl {{ConfigOptionEquals "postgres_type" "embedded_postgres"}}
         checkName: External Postgres is available
         collectorName: postgresql
         outcomes:
