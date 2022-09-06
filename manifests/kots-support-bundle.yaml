@@ -88,3 +88,24 @@ spec:
             message: No Postgres database available
         - pass:
             message: Postgres database is ready
+  - postgres:
+      checkName: Postgres available
+      collectorName: postfacto
+      outcomes:
+        - fail:
+            when: connected == false
+            message: Cannot connect to PostgreSQL server
+        - pass:
+            message: The PostgreSQL server is ready
+  - jsonCompare:
+      checkName: PostgresAvailable
+      fileName: redis/postfacto.json
+      path: "isConnected"
+      value: "true"
+      outcomes:
+        - fail:
+            when: "false"
+            message: Cannot connect to Redis server
+        - pass:
+            when: "true"
+            message: The Redis server is ready

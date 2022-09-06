@@ -1,0 +1,86 @@
+
+resources:
+- name: source
+  type: git
+  icon: github
+  source:
+    uri: ((repository)
+    branch: ((branch))
+    paths:
+    - "manifests/**"
+    - "kurl-installer.yaml"
+
+- name: version
+  type: semver
+  icon: counter
+  source:
+    endpoint: ((minio.fqdn))
+    access_key_id: ((minio.access_key_id))
+    secret_access_key: ((minio.secret_access_key))
+    bucket: ((bucket))
+    key: ((app-slug)).version 
+
+replicated-params: &replicated-params
+  REPLICATED_APP: ((app-slug))
+  REPLICATED_API_KEY: ((api-key))
+  CHANNEL: ((channel))
+
+jobs:
+- name: lint
+  plan:
+  - get: source
+    trigger: true
+  - task: lint
+    config:
+      platform: linux
+      image_resource:
+        type: registry-image
+        source:
+          repository: registry.shortrib.dev/toolkit/toolkit
+      inputs:
+      - name: source
+      - name: user-data
+      params: *replicated-params
+      run:
+        path: bash
+        args:
+        - -c
+        - |
+          replicated release lint --yaml-dir source/manifests
+
+- name: create-release
+  plan:
+  - get: source
+    trigger: true
+    passed:
+      - lint
+  - get: version
+    params: 
+      bump: ((bump))
+      pre: ((pre))
+  - task: create-release
+    config:
+      platform: linux
+      image_resource:
+        type: registry-image
+        source:
+          repository: registry.shortrib.dev/toolkit/toolkit
+      inputs:
+      - name: source
+      params: *replicated-params
+      run:
+        path: bash
+        args:
+        - -c
+        - |
+          replicated release create \
+            --app "${REPLICATED_APP}" \
+            --release-notes "$(cat source/.git/commit_message)" \
+            --version "$(cat version/version)" \
+            --token "${REPLICATED_API_TOKEN}" \
+            --yaml-dir source/manifests \
+            --promote "${CHANNEL}"
+
+ - put: version
+    params: 
+      file: version/version

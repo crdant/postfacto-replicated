@@ -9,7 +9,8 @@ spec:
   statusInformers:
     - deployment/postfacto
     - statefulset/postfacto-postgresql
-    - statefulset/postfacto-redis
+    - statefulset/postfacto-redis-master
+    - statefulset/postfacto-redis-replicas
   ports:
     - serviceName: "postfacto"
       servicePort: 80

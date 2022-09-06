@@ -30,7 +30,7 @@ spec:
       title: Secret Key Base
       help_text: "Used for signing and encryption, should be set to a random value. Required to perserve sessions across upgrades"
       type: password
-      default: repl{{ RandomString 10 }}
+      value: repl{{ RandomString 10 }}
       when: false
   - name: datastores
     title: Data Service Configuration
