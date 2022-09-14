@@ -60,3 +60,7 @@ spec:
   builder:
     metrics:
       enabled: true
+    postgres:
+      enabled: true
+    redis:
+      enabled: true
