@@ -45,7 +45,7 @@ spec:
           - hosts:
             - repl{{ ConfigOption "fqdn" }}
             secretName: postfacto-cert 
-   - when: '{{repl ConfigOptionEquals "postgres_secret_type" "specify_password"}}'
+    - when: '{{repl ConfigOptionEquals "postgres_secret_type" "specify_password"}}'
       recursiveMerge: true
       values:
         postgresql:
