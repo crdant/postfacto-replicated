@@ -72,7 +72,7 @@ spec:
       when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres_inline"}}'
       type: text
       default: "5432"
-    - name: external_postgres_user
+    - name: external_postgres_username
       title: Postgres Username
       when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres_inline"}}'
       type: text
@@ -82,7 +82,7 @@ spec:
       when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres_inline"}}'
       type: password
       required: true
-    - name: external_postgres_db
+    - name: external_postgres_database
       title: Postgres Database
       when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres_inline"}}'
       type: text
