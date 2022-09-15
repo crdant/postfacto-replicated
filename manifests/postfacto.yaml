@@ -6,7 +6,7 @@ metadata:
 spec:
   chart:
     name: postfacto
-    chartVersion: 0.1.0-SNAPSHOT
+    chartVersion: 0.2.0-SNAPSHOT
 
   # helmVersion identifies the Helm Version used to render the Chart. Default is v2.
   helmVersion: v3
@@ -26,8 +26,7 @@ spec:
         username: repl{{ ConfigOption "embedded_postgres_username" }}
         database: repl{{ ConfigOption "embedded_postgres_database" }}
         enablePostgresUser: false
-
-   optionalValues:
+  optionalValues:
     - when: 'repl{{ not ( empty ( ConfigOption "fqdn" )) }}'
       recursiveMerge: true
       values:
