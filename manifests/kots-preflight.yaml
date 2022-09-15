@@ -106,7 +106,7 @@ spec:
               message: "Specified Posgress secret contains the required key `password`"
     - jsonCompare:
         checkName: Specified Redis secret exists
-        exclude: repl{{ ConfigOptionNotEquals "redips_secret_type" "existing_secret" }}
+        exclude: repl{{ ConfigOptionNotEquals "redis_secret_type" "existing_secret" }}
         fileName: 'secrets/{{repl Namespace}}/{{repl ConfigOption "existing_redis_secret"}}/password.json'
         path: "secretExists"
         value: true
