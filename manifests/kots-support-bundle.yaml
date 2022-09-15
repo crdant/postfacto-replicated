@@ -36,7 +36,19 @@ spec:
       uri: 'postgres://{{repl ConfigOption "embedded_postgres_username" }}:{{repl ConfigOption "embedded_postgres_password" }}@postfacto-postgresql'
   - redis:
       collectorName: postfacto
-      uri: 'redis://:{{repl ConfigOption "embedded_redis_password"}}@{{repl ConfigOption "external_redis_host"}}:{{repl ConfigOption "external_redis_port"}}'
+      uri: 'redis://:{{repl ConfigOption "embedded_redis_password"}}@postfacto-redis-master'
+  - secret:
+      collectorName: existing_postgres_secret
+      exclude: repl{{ ConfigOptionNotEquals "postgres_secret_type" "existing_secret" }}
+      namespace: '{{repl Namespace}}'
+      name: '{{repl ConfigOption "existing_postgres_secret" }}'
+      key: password
+  - secret:
+      collectorName: existing_redis_secret
+      exclude: repl{{ ConfigOptionNotEquals "redis_secret_type" "existing_secret" }}
+      namespace: '{{repl Namespace}}'
+      name: '{{repl ConfigOption "existing_redis_secret" }}'
+      key: password
   analyzers:
   - imagePullSecret:
       checkName: Access to index.docker.io
@@ -109,3 +121,56 @@ spec:
         - pass:
             when: "true"
             message: The Redis server is ready
+  - jsonCompare:
+      checkName: Specified Postgres secret exists
+      exclude: repl{{ ConfigOptionNotEquals "postgres_secret_type" "existing_secret" }}
+      fileName: 'secrets/{{repl Namespace}}/{{repl ConfigOption "existing_postgres_secret"}}/password.json'
+      path: "secretExists"
+      value: true
+      outcomes:
+        - fail: 
+            when: "false"
+            message: "Specified Postgres secret does not exist"
+        - pass:
+            when: "true"
+            message: "Specified Posgress secret is available"
+  - jsonCompare:
+      checkName: Specified Postgres secret has key `password`
+      exclude: repl{{ ConfigOptionNotEquals "postgres_secret_type" "existing_secret" }}
+      fileName: 'secrets/{{repl Namespace}}/{{repl ConfigOption "existing_postgres_secret"}}/password.json'
+      path: "secretExists"
+      value: true
+      outcomes:
+        - fail: 
+            when: "false"
+            message: "Specified Postgres secret does not contain the key `password`"
+        - pass:
+            when: "true"
+            message: "Specified Posgress secret contains the required key `password`"
+  - jsonCompare:
+      checkName: Specified Redis secret exists
+      exclude: repl{{ ConfigOptionNotEquals "redips_secret_type" "existing_secret" }}
+      fileName: 'secrets/{{repl Namespace}}/{{repl ConfigOption "existing_redis_secret"}}/password.json'
+      path: "secretExists"
+      value: true
+      outcomes:
+        - fail: 
+            when: "false"
+            message: "Specified Redis secret does not exist"
+        - pass:
+            when: "true"
+            message: "Specified Redis secret is available"
+  - jsonCompare:
+      checkName: Specified Redis secret has key `password`
+      exclude: repl{{ ConfigOptionNotEquals "redis_secret_type" "existing_secret" }}
+      fileName: 'secrets/{{repl Namespace}}/{{repl ConfigOption "existing_redis_secret"}}/password.json'
+      path: "secretExists"
+      value: true
+      outcomes:
+        - fail: 
+            when: "false"
+            message: "Specified Redis secret does not contain the key `password`"
+        - pass:
+            when: "true"
+            message: "Specified Redis secret contains the required key `password`"
+
