@@ -53,7 +53,7 @@ spec:
       title: Postgres Authentication
       default: specify_password
       items:
-        - name: specify_passwrod
+        - name: specify_password
           title: Specify Password
         - name: existing_secret
           title: Use Existing Secret
