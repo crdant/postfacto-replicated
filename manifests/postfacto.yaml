@@ -21,7 +21,13 @@ spec:
     disable_ssl_redirect: repl{{ ConfigOption "disable_ssl_redirect" }}
     secret_key_base: repl{{ ConfigOption "secret_key_base" }}
 
-  optionalValues:
+    postgresql:
+      auth:
+        username: repl{{ ConfigOption "embedded_postgres_username" }}
+        database: repl{{ ConfigOption "embedded_postgres_database" }}
+        enablePostgresUser: false
+
+   optionalValues:
     - when: 'repl{{ not ( empty ( ConfigOption "fqdn" )) }}'
       recursiveMerge: true
       values:
@@ -39,21 +45,30 @@ spec:
           - hosts:
             - repl{{ ConfigOption "fqdn" }}
             secretName: postfacto-cert 
-    - when: '{{repl ConfigOptionEquals "postgres_type" "embedded_postgres"}}'
+   - when: '{{repl ConfigOptionEquals "postgres_secret_type" "specify_password"}}'
       recursiveMerge: true
       values:
         postgresql:
           auth:
-            enablePostgresUser: false
-            username: repl{{ ConfigOption "embedded_postgres_username" }}
             password: repl{{ ConfigOption "embedded_postgres_password" }}
-            database: repl{{ ConfigOption "embedded_postgres_database" }}
-    - when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
+    - when: '{{repl ConfigOptionEquals "postgres_secret_type" "existing_secret"}}'
       recursiveMerge: true
-      values: {}
-    - when: '{{repl ConfigOptionEquals "postgres_type" "external_redis"}}'
+      values:
+        postgresql:
+          auth:
+            existingSecret: repl{{ ConfigOption "existing_postgres_secret" }}
+   - when: '{{repl ConfigOptionEquals "redis_secret_type" "specify_password"}}'
       recursiveMerge: true
-      values: {}
+      values:
+        redis:
+          auth:
+            password: repl{{ ConfigOption "embedded_redis_password" }}
+    - when: '{{repl ConfigOptionEquals "redis_secret_type" "existing_secret"}}'
+      recursiveMerge: true
+      values:
+        redis:
+          auth:
+            existingSecret: repl{{ ConfigOption "existing_redis_secret" }}
 
   # When building AirGap, metrics needs to be explicitly enabled so the prometheus image can be bundled along. 
   # Kots does not include the image unless the service is explicitly enabled during the bundle building process.
