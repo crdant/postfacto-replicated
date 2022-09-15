@@ -1,6 +1,7 @@
 PROJECT_DIR    := $(shell pwd)
 PROJECT_PARAMS := secrets/params.yaml
 CHANNEL        := $(shell yq .replicated.channel $(PROJECT_PARAMS))
+APPLICATION    := $(shell yq .replicated.app-slug $(PROJECT_PARAMS))
 
 MANIFEST_DIR := $(PROJECT_DIR)/manifests
 MANIFESTS    := $(shell find $(MANIFEST_DIR) -name '*.yaml' -o -name '*.tgz')
@@ -13,21 +14,31 @@ REPOSITORY  := $(shell git remote get-url origin | sed -Ene's_git@(github.com):(
 CI_DIR   := $(PROJECT_DIR)/ci
 BRANCH   := $(shell git branch --show-current)
 PRE      := SNAPSHOT
+ifeq ($(PRE),SNAPSHOT)
+  PRE_NO_VERSION := true
+else
+  PRE_NO_VRESION := false
+endif
 
 .PHONY: secrets
 secrets: $(PROJECT_PARAMS)
 	@vault kv put concourse/$(TEAM)/$(PIPELINE)/minio \
 		fqdn=$(shell yq .minio.fqdn $(PROJECT_PARAMS)) \
 		access_key_id=$(shell yq .minio.access-key $(PROJECT_PARAMS)) \
-		secret_access_key=$(shell yq .minio.secret-key $(PROJECT_PARAMS)) \
+		secret_access_key=$(shell yq .minio.secret-key $(PROJECT_PARAMS))
 	@vault kv put concourse/$(TEAM)/$(PIPELINE)/replicated \
 		api-token=$(shell yq .replicated.api-token $(PROJECT_PARAMS))
+	@vault kv put concourse/$(TEAM)/$(PIPELINE)/registry \
+    fqdn="$(shell yq e .registry.fqdn $(PROJECT_PARAMS))"  \
+    robot='$(shell yq e .registry.robot $(PROJECT_PARAMS))'  \
+    token="$(shell yq e .registry.token $(PROJECT_PARAMS))"
 
 .PHONY: pipeline
 pipeline: secrets
-	@fly --target $(TEAM) set-pipeline --pipeline $(PIPELINE) --config $(CI_DIR)/pipeline/pipeline.yaml \
-			--var repository=$(REPOSITORY) --var branch=$(BRANCH) --var channel=$(CHANNEL) \
-			--var bump=$(BUMP) --var pre=$(PRE)
+	@fly --target $(TEAM) set-pipeline --pipeline $(PIPELINE) --config $(CI_DIR)/pipeline/pipeline.yaml --non-interactive \
+			--var team=${TEAM} --var repository=$(REPOSITORY) --var branch=$(BRANCH) --var bucket=$(TEAM) \
+			--var app-slug=$(APPLICATION) --var channel=$(CHANNEL) \
+      --var bump=$(BUMP) --var pre=$(PRE) --yaml-var pre-no-version=$(PRE_NO_VERSION)
 	@fly --target $(TEAM) unpause-pipeline --pipeline $(PIPELINE)
 
 lint: $(MANIFESTS)
@@ -35,7 +46,7 @@ lint: $(MANIFESTS)
 
 release: $(MANIFESTS)
 	@replicated release create \
-		--app ${REPLICATED_APP} \
+		--app $(APPLICATION) \
 		--token ${REPLICATED_API_TOKEN} \
 		--auto -y \
 		--yaml-dir $(MANIFEST_DIR) \

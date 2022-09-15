@@ -1,10 +1,9 @@
-
 resources:
 - name: source
   type: git
   icon: github
   source:
-    uri: ((repository)
+    uri: ((repository))
     branch: ((branch))
     paths:
     - "manifests/**"
@@ -20,33 +19,97 @@ resources:
     bucket: ((bucket))
     key: ((app-slug)).version 
 
+- name: chart-version
+  type: semver
+  icon: counter
+  source:
+    endpoint: ((minio.fqdn))
+    access_key_id: ((minio.access_key_id))
+    secret_access_key: ((minio.secret_access_key))
+    bucket: ((bucket))
+    key: postfacto-chart.version 
+
 replicated-params: &replicated-params
   REPLICATED_APP: ((app-slug))
-  REPLICATED_API_KEY: ((api-key))
-  CHANNEL: ((channel))
+  REPLICATED_API_TOKEN: ((replicated.api-token))
 
-jobs:
-- name: lint
-  plan:
-  - get: source
-    trigger: true
-  - task: lint
+replicated-cli-image: &replicated-cli-image
+  type: registry-image
+  source:
+    repository: replicated/vendor-cli
+
+pull-chart: &pull-chart
+  - get: chart-version
+  - load_var: chart-version
+    file: chart-version/version
+  - task: registry-login
+    privileged: true
     config:
       platform: linux
       image_resource:
         type: registry-image
         source:
-          repository: registry.shortrib.dev/toolkit/toolkit
+          repository: dtzar/helm-kubectl
       inputs:
       - name: source
-      - name: user-data
+      outputs:
+      - name: config
+      run:
+        path: helm
+        args:
+        - registry
+        - login
+        - ((registry.fqdn))
+        - --username
+        - ((registry.robot))
+        - --password
+        - ((registry.token))
+        - --registry-config
+        - config/registry.json
+  - task: pull-chart
+    privileged: true
+    config:
+      platform: linux
+      image_resource:
+        type: registry-image
+        source:
+          repository: dtzar/helm-kubectl
+      inputs:
+      - name: source
+      - name: config
+      outputs:
+      - name: source
+      run:
+        dir: source/manifests
+        path: helm
+        args:
+        - pull
+        - oci://((registry.fqdn))/((team))/charts/postfacto
+        - --version
+        - ((.:chart-version))
+        - --registry-config
+        - ../../config/registry.json
+  
+jobs:
+- name: lint
+  plan:
+  - get: source
+    trigger: true
+  - do: *pull-chart
+  - task: lint
+    config:
+      platform: linux
+      image_resource: *replicated-cli-image
+      inputs:
+      - name: source
       params: *replicated-params
       run:
-        path: bash
+        path: /replicated
         args:
-        - -c
-        - |
-          replicated release lint --yaml-dir source/manifests
+        - release
+        - lint
+        - --yaml-dir
+        - source/manifests
 
 - name: create-release
   plan:
@@ -58,29 +121,37 @@ jobs:
     params: 
       bump: ((bump))
       pre: ((pre))
+      pre_without_version: ((pre-no-version))
+  - do: *pull-chart
+  - load_var: release-notes
+    file: source/.git/commit_message
+  - load_var: version
+    file: version/version
   - task: create-release
     config:
       platform: linux
-      image_resource:
-        type: registry-image
-        source:
-          repository: registry.shortrib.dev/toolkit/toolkit
+      image_resource: *replicated-cli-image
       inputs:
       - name: source
       params: *replicated-params
       run:
-        path: bash
+        path: /replicated
         args:
-        - -c
-        - |
-          replicated release create \
-            --app "${REPLICATED_APP}" \
-            --release-notes "$(cat source/.git/commit_message)" \
-            --version "$(cat version/version)" \
-            --token "${REPLICATED_API_TOKEN}" \
-            --yaml-dir source/manifests \
-            --promote "${CHANNEL}"
+        - release
+        - create
+        - --app 
+        - ((app-slug))
+        - --release-notes 
+        - ((.:release-notes))
+        - --version
+        - ((.:version))
+        - --token 
+        - ((replicated.api-token))
+        - --promote 
+        - ((channel))
+        - --yaml-dir 
+        - source/manifests 
 
- - put: version
+  - put: version
     params: 
       file: version/version
