@@ -57,7 +57,7 @@ spec:
         postgresql:
           auth:
             existingSecret: repl{{ ConfigOption "existing_postgres_secret" }}
-   - when: '{{repl ConfigOptionEquals "redis_secret_type" "specify_password"}}'
+    - when: '{{repl ConfigOptionEquals "redis_secret_type" "specify_password"}}'
       recursiveMerge: true
       values:
         redis:
