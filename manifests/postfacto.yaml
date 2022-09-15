@@ -26,6 +26,9 @@ spec:
         username: repl{{ ConfigOption "embedded_postgres_username" }}
         database: repl{{ ConfigOption "embedded_postgres_database" }}
         enablePostgresUser: false
+    admin-console:
+      enabled: false
+
   optionalValues:
     - when: 'repl{{ not ( empty ( ConfigOption "fqdn" )) }}'
       recursiveMerge: true

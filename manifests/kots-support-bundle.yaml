@@ -48,7 +48,7 @@ spec:
       exclude: repl{{ ConfigOptionNotEquals "redis_secret_type" "existing_secret" }}
       namespace: '{{repl Namespace}}'
       name: '{{repl ConfigOption "existing_redis_secret" }}'
-      key: password
+      key: redis-password
   analyzers:
   - imagePullSecret:
       checkName: Access to index.docker.io
@@ -161,16 +161,16 @@ spec:
             when: "true"
             message: "Specified Redis secret is available"
   - jsonCompare:
-      checkName: Specified Redis secret has key `password`
+      checkName: Specified Redis secret has key `redis-password`
       exclude: repl{{ ConfigOptionNotEquals "redis_secret_type" "existing_secret" }}
-      fileName: 'secrets/{{repl Namespace}}/{{repl ConfigOption "existing_redis_secret"}}/password.json'
+      fileName: 'secrets/{{repl Namespace}}/{{repl ConfigOption "existing_redis_secret"}}/redis-password.json'
       path: "secretExists"
       value: true
       outcomes:
         - fail: 
             when: "false"
-            message: "Specified Redis secret does not contain the key `password`"
+            message: "Specified Redis secret does not contain the key `redis-password`"
         - pass:
             when: "true"
-            message: "Specified Redis secret contains the required key `password`"
+            message: "Specified Redis secret contains the required key `redis-password`"
 
